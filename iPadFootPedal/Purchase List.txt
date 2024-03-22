@@ -1,0 +1,16 @@
+Processor Board- RP2040 Micro Controller
+https://a.co/d/a7tSBvm
+
+Microswitch
+https://a.co/d/1S8c0FD
+
+https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+
+USB-C Cables
+https://a.co/d/hI07b3h
+
+M4 screws
+https://a.co/d/fPLNDAH
+
+Anti-Slip Circles
+https://a.co/d/6CJeoes
