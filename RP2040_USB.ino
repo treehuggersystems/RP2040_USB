@@ -4,7 +4,6 @@
 
 const int BUTTON_GPIO = D0; // GPIO pin for the button input
 unsigned long lastButtonPressTime = 0;
-unsigned long lastLongHoldReportTime = 0;
 bool longHoldDetected = false;
 bool shortHoldDetected = false;
 
@@ -26,56 +25,46 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(BUTTON_GPIO) == HIGH && millis() - lastButtonPressTime > 100) { // Button is pressed and debounce timer (100ms) has elapsed
+  if (digitalRead(BUTTON_GPIO) == HIGH && millis() - lastButtonPressTime > 50) { // Button is pressed and debounce timer (50ms) has elapsed
     unsigned long buttonPressStartTime = millis();
-
-    // Wait for button release or long hold
-    while (digitalRead(BUTTON_GPIO) == HIGH) {
-      if (millis() - buttonPressStartTime > 1500) { // Long hold (> 1500ms)
-        if (!longHoldDetected) {
-          Serial.println("Long hold");
-          pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Turn NeoPixel red
-          pixels.show();
-          Keyboard.press(KEY_UP_ARROW);
-          delay(50);
-          Keyboard.release(KEY_UP_ARROW);
-          longHoldDetected = true;
-          lastLongHoldReportTime = millis();
-          break;
-        }
-        else if (millis() - lastLongHoldReportTime >= 1000) {
-          Serial.println("Long hold continued");
-          Keyboard.press(KEY_UP_ARROW);
-          delay(50);
-          Keyboard.release(KEY_UP_ARROW);
-          lastLongHoldReportTime = millis();
-        }
-      }
+    
+    // Check for long hold (> 750ms)
+    while (digitalRead(BUTTON_GPIO) == HIGH && millis() - buttonPressStartTime < 750) {
+      delay(50); // Delay to debounce and avoid multiple detections
     }
-
-    if (!longHoldDetected && digitalRead(BUTTON_GPIO) == LOW) { // Short hold (< 2500ms)
-      delay(100); // Wait for debounce
-      if (digitalRead(BUTTON_GPIO) == LOW && !shortHoldDetected) { // Button is released
+    
+    if (digitalRead(BUTTON_GPIO) == HIGH) {
+      Serial.println("Long hold");
+      pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Turn NeoPixel red
+      pixels.show();
+      Keyboard.press(KEY_UP_ARROW);
+      delay(50);
+      Keyboard.release(KEY_UP_ARROW);
+      longHoldDetected = true;
+      shortHoldDetected = true;
+    } else {
+      // Short hold (< 750ms)
+      if (!shortHoldDetected) {
         Serial.println("Short hold");
         pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Turn NeoPixel green
         pixels.show();
         Keyboard.press(KEY_DOWN_ARROW); // Send down arrow through keyboard
         delay(50);
         Keyboard.release(KEY_DOWN_ARROW);
-        delay(1000); // Wait for 1 second
-        pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Turn off NeoPixel
-        pixels.show();
         shortHoldDetected = true;
       }
     }
 
-    lastButtonPressTime = millis(); // Update last button press time
-  }
-  else if(digitalRead(BUTTON_GPIO) == LOW){ // Button is not pressed, turn off lights
+    // Update last button press time
+    lastButtonPressTime = millis();
+  } else if (digitalRead(BUTTON_GPIO) == LOW) { // Button is not pressed, turn off lights
     pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Turn off NeoPixel
     pixels.show();
     longHoldDetected = false;
-    Keyboard.releaseAll(); // Release all keys
     shortHoldDetected = false;
+    Keyboard.releaseAll(); // Release all keys
+    
+    // Introduce a small delay before checking button state again
+    delay(50);
   }
 }
