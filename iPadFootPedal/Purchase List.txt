@@ -1,8 +1,8 @@
 Processor Board- RP2040 Micro Controller
 https://a.co/d/a7tSBvm
 
-Microswitch
-https://a.co/d/1S8c0FD
+Momentary Switch
+https://a.co/d/0en9iuhH
 
 https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
